@@ -1,0 +1,90 @@
+{% extends "layouts/main.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="col d-flex justify-content-center">
+                <div class="alert alert-success" role="alert">
+                    <h4>Tu factura está lista</h4>
+                    <form action="{{ url_for('invoice_pdf') }}" method="POST">
+                        <div class="form-group text-center">
+                            <button class="btn btn-success" id="positions-submit" type="submit">Descargar PDF</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="card top-margin">
+                <div class="card-body p-0">
+                    <div class="row p-5">
+                        <div class="col-md-12 text-right">
+                            <p class="mb-1">Empresa Ejemplo S.A.</p>
+                            <p>Juan Pérez</p>
+                            <p class="mb-1">Calle Ejemplo 42</p>
+                            <p class="mb-1">12345 Ciudad Ejemplo</p>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
+                    <div class="row pb-5 p-5">
+                        <div class="col-md-6">
+                            <p class="font-weight-bold mb-4">Datos del cliente</p>
+                            <p class="mb-1">{{ invoice_details.firstname }} {{ invoice_details.lastname }}</p>
+                            <p>{{ invoice_details.company_name }}</p>
+                            <p class="mb-1">{{ invoice_details.street }} {{ invoice_details.house_number }}</p>
+                            <p class="mb-1">{{ invoice_details.zip_code }} {{ invoice_details.city }}</p>
+                        </div>
+
+                        <div class="col-md-6 text-right">
+                            <p class="font-weight-bold mb-4">Datos de la factura</p>
+                            <p class="mb-1"><span class="text-muted">Factura n.º: </span>{{ invoice_details.invoice_number }}</p>
+                            <p class="mb-1"><span class="text-muted">Fecha de emisión: </span>{{ created.strftime('%d/%m/%Y') }}</p>
+                            <p class="mb-1"><span class="text-muted">Vence: </span>{{ payment_due.strftime('%d/%m/%Y') }}</p>
+                            <p class="mb-1"><span class="text-muted">Inicio del periodo: </span>{{ invoice_details.start_date.strftime('%d/%m/%Y') }}</p>
+                            <p class="mb-1"><span class="text-muted">Fin del periodo: </span>{{ invoice_details.end_date.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="row p-5">
+                        <div class="col-md-12">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th class="border-0 text-uppercase small font-weight-bold">N.º</th>
+                                        <th class="border-0 text-uppercase small font-weight-bold">Cantidad</th>
+                                        <th class="border-0 text-uppercase small font-weight-bold">Unidad</th>
+                                        <th class="border-0 text-uppercase small font-weight-bold">Descripción</th>
+                                        <th class="border-0 text-uppercase small font-weight-bold">Precio unitario</th>
+                                        <th class="border-0 text-uppercase small font-weight-bold">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for position in positions %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ position.amount }}</td>
+                                        <td>{{ position.unit }}</td>
+                                        <td>{{ position.description }}</td>
+                                        <td>{{ position.price|currencyFormat }}</td>
+                                        <td>{{ position.total|currencyFormat }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-row-reverse total-pato p-4">
+                        <div class="py-3 px-5 text-right">
+                            <div class="mb-2">Total general</div>
+                            <div class="h2 font-weight-heavy">{{ total|currencyFormat }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+{% endblock %}

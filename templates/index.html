@@ -1,0 +1,19 @@
+{% extends "layouts/main.html" %}
+
+{% block content %}
+<div class="col d-flex justify-content-center">
+    <div class="card w-75 top-margin">
+        <div class="card-body">
+            <h2 class="text-center">Bienvenido al proyecto Generador de Facturas.</h2>
+            <p class="text-center">
+                Este proyecto muestra cómo armar una app sencilla en Flask que genera facturas en PDF con flask, flask-sqlalchemy, bootstrap y weasyprint.
+                La forma más común de crear PDFs con Python puro es Reportlab, pero lleva bastante tiempo lograr que el diseño quede como uno quiere.
+                En este proyecto uso weasyprint para generar la factura en PDF a partir de una plantilla HTML.
+            </p>
+            <p class="text-center">
+                Puedes probar el generador. Si tienes sugerencias para mejorarlo, escríbeme.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

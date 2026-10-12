@@ -1,0 +1,115 @@
+:root {
+    --pato: #FFD21F;
+    --pato-oscuro: #E6B800;
+    --pato-suave: #FFF3B0;
+    --fondo: #FFFBE8;
+    --tinta: #2B2200;
+}
+
+body {
+    background-color: var(--fondo);
+    color: var(--tinta);
+}
+
+.top-margin {
+    margin-top: 1em;
+}
+
+.hidden-content {
+    display: none !important;
+}
+
+.alert {
+    margin-top: 1em;
+}
+
+.btn-link {
+    text-decoration: none !important;
+    color: var(--tinta) !important;
+}
+
+.navbar-pato {
+    background-color: var(--pato);
+    border-bottom: 3px solid var(--tinta);
+}
+
+.navbar-pato .navbar-brand,
+.navbar-pato .nav-link {
+    color: var(--tinta) !important;
+    font-weight: 600;
+}
+
+.navbar-pato .nav-item.active .nav-link {
+    border-bottom: 2px solid var(--tinta);
+}
+
+.navbar-pato .navbar-toggler {
+    border-color: rgba(43, 34, 0, .5);
+}
+
+.navbar-pato .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2843, 34, 0, 1%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Tarjetas y acordeón */
+.card {
+    border: 1px solid rgba(43, 34, 0, .18);
+    border-radius: .6rem;
+    box-shadow: 0 2px 0 rgba(43, 34, 0, .08);
+}
+
+.card-header {
+    background-color: var(--pato-suave);
+}
+
+/* Botones */
+.btn-primary,
+.btn-success {
+    background-color: var(--pato);
+    border-color: var(--tinta);
+    color: var(--tinta);
+    font-weight: 600;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:not(:disabled):not(.disabled):active {
+    background-color: var(--pato-oscuro);
+    border-color: var(--tinta);
+    color: var(--tinta);
+}
+
+.btn-primary:focus,
+.btn-success:focus {
+    box-shadow: 0 0 0 .2rem rgba(255, 210, 31, .5);
+}
+
+/* Campos de formulario */
+.form-control:focus {
+    border-color: var(--pato-oscuro);
+    box-shadow: 0 0 0 .2rem rgba(255, 210, 31, .4);
+}
+
+/* Tablas */
+.thead-pato th {
+    background-color: var(--tinta);
+    color: var(--pato);
+    border-color: var(--tinta);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--pato-suave);
+}
+
+.total-pato {
+    background-color: var(--pato);
+    color: var(--tinta);
+    border-top: 3px solid var(--tinta);
+}
+
+a {
+    color: #8A6500;
+}

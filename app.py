@@ -1,0 +1,160 @@
+from flask import\
+    Flask,\
+    render_template,\
+    jsonify,\
+    redirect,\
+    url_for,\
+    flash,\
+    request,\
+    send_file
+from forms import PositionsForm, InvoiceForm
+from models import setup_db, db_drop_and_create_all, Positions, InvoiceDetails
+from filters import currencyFormat
+from decouple import config
+from weasyprint import HTML
+import io
+import datetime
+
+
+def create_app():
+    app = Flask(__name__)
+    app.secret_key = config('SECRET_KEY', default='you-will-never-guess')
+    app.jinja_env.filters['currencyFormat'] = currencyFormat
+    setup_db(app)
+    '''
+    Esta línea inicializa la base de datos.
+    !! OJO: BORRA TODOS LOS REGISTROS Y EMPIEZA DE CERO
+    !! Tiene que estar activa en la primera ejecución. Después puedes
+    !! comentarla para no perder los datos cada vez que arranque el servidor.
+    '''
+    db_drop_and_create_all()
+
+    @app.route('/')
+    def index():
+
+        return render_template(
+            '/index.html',
+            title='Generador de Facturas',
+            active_page='home'
+        )
+
+    @app.route('/invoice_data', methods=['GET', 'POST'])
+    def invoice_form():
+        invoice_details = InvoiceDetails.query.one_or_none()
+        positions_form = PositionsForm(prefix='positions')
+        invoice_form = InvoiceForm(prefix='invoice', obj=invoice_details)
+
+        if request.method == 'POST':
+            if positions_form.validate_on_submit():
+                unit = positions_form.unit.data
+                amount = positions_form.amount.data
+                price = positions_form.price.data
+                description = positions_form.description.data
+                total = amount * price
+                new_position = Positions(
+                    unit=unit,
+                    amount=amount,
+                    price=price,
+                    description=description,
+                    total=total
+                )
+                new_position.insert()
+
+                flash('Concepto agregado correctamente.', 'success')
+            elif invoice_form.validate_on_submit():
+                form_invoice_details = invoice_form.data
+                form_invoice_details.pop('csrf_token', None)
+                if invoice_details is None:
+                    invoice_details = InvoiceDetails(**form_invoice_details)
+                    invoice_details.insert()
+                else:
+                    invoice_details.update(**form_invoice_details)
+
+                positions = Positions.query.all()
+                total = 0
+                for position in positions:
+                    total += position.total
+                created = datetime.date.today()
+                payment_due = created + datetime.timedelta(days=14)
+
+                return render_template('/invoice_details.html',
+                                       title='Detalle de la factura',
+                                       invoice_details=invoice_details,
+                                       positions=positions,
+                                       created=created,
+                                       payment_due=payment_due,
+                                       total=total
+                                       )
+            else:
+                flash('Revisa los datos del formulario.', 'error')
+
+        positions = Positions.query.all()
+
+        return render_template(
+            '/invoice_form.html',
+            title='Formulario de factura',
+            active_page='form',
+            positions_form=positions_form,
+            invoice_form=invoice_form,
+            positions=positions
+        )
+
+    @app.route('/position_delete', methods=['DELETE'])
+    def position_delete():
+        position_id = request.get_json()['position_id']
+        url = url_for('invoice_form')
+        try:
+            position = Positions.query.get(position_id)
+            position.delete()
+            flash('Concepto eliminado.', 'success')
+        except Exception as e:
+            flash('No se pudo eliminar el concepto.', 'error')
+            flash(str(e), 'error')
+
+        body = {
+            'url': url
+        }
+
+        return jsonify(body), 200
+
+    @app.route('/invoice_pdf', methods=['POST'])
+    def invoice_pdf():
+        invoice_details = InvoiceDetails.query.one_or_none()
+        positions = Positions.query.all()
+        total = 0
+        for position in positions:
+            total += position.total
+        created = datetime.date.today()
+        payment_due = created + datetime.timedelta(days=14)
+        try:
+            rendered = render_template('invoice_details_pdf.html',
+                                       invoice_details=invoice_details,
+                                       positions=positions,
+                                       created=created,
+                                       payment_due=payment_due,
+                                       total=total
+                                       )
+            # base_url permite que WeasyPrint encuentre /static/css/style.css
+            html = HTML(string=rendered, base_url=request.url_root)
+            invoice_pdf = html.write_pdf()
+            return send_file(
+                io.BytesIO(invoice_pdf),
+                attachment_filename=f'factura_{invoice_details.invoice_number}.pdf'
+                )
+        except Exception as e:
+            flash(
+                'Ocurrió un error y no se pudo generar la factura en PDF.',
+                'error'
+                )
+            flash(str(e), 'error')
+
+            return render_template('/invoice_details.html',
+                                   title='Detalle de la factura',
+                                   invoice_details=invoice_details,
+                                   positions=positions,
+                                   created=created,
+                                   payment_due=payment_due,
+                                   total=total
+                                   )
+
+    return app
